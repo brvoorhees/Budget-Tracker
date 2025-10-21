@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Budget Tracker</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, select, button { margin: 5px; padding: 5px; }
+    .section { margin-bottom: 20px; }
+    #report { white-space: pre-wrap; background: #f0f0f0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>💰 Budget Tracker</h1>
+
+<div class="section">
+	
+	<label for="month">Month:</label>
+	<select id="month"></select>
+
+
+	<label for="year">Year:</label>
+	<input type="number" id="year" min="2000" max="2100">
+
+
+
+	<div id="categorySection">
+	<label>Type:</label>
+<div id="typeOptions">
+  <label><input type="radio" name="type" value="income" checked onchange="updateCategoryDropdown()"> Income</label>
+  <label><input type="radio" name="type" value="expense" onchange="updateCategoryDropdown()"> Expense</label>
+</div>
+
+	
+	<label for="categorySelect">Category:</label>
+	<select id="categorySelect"></select>
+	
+	<button onclick="toggleNewCategory()">➕ Add New Category</button>
+	<input type="text" id="newCategory" placeholder="New category name" style="display:none;">
+	</div>
+
+
+	<label for="amount">Amount:</label>
+	<input type="number" id="amount" placeholder="e.g., 1000">
+
+	<button onclick="addEntry()">Add Entry</button>
+</div>
+
+<div class="section">
+	<h3>📅 Current Month Summary</h3>
+	<div id="currentData"></div>
+</div>
+
+<div class="section">
+	<label for="reportMonth">Report Month:</label>
+	<select id="reportMonth">
+
+
+
+	<label for="reportYear">Year:</label>
+	<input type="number" id="reportYear" min="2000" max="2100">
+	
+	<button onclick="generateReport()">📊 Generate Report</button>
+	<div id="report"></div>
+</div>
+
+
+<div class="section">
+<button onclick="clearCurrentMonth()">🧹 Clear Current Month</button>
+</div>
+<div class="section">
+<button onclick="clearData()">🧹 Clear All Data</button>
+</div>
+
+<script>
+    const income = JSON.parse(localStorage.getItem('income')) || {};
+    const expenses = JSON.parse(localStorage.getItem('expenses')) || {};
+	const data = JSON.parse(localStorage.getItem('budgetData')) || {};
+	const categories = JSON.parse(localStorage.getItem('categories')) || {income: [],expense: []};
+
+	function updateCategoryDropdown() 
+	{
+	  const type = document.querySelector('input[name="type"]:checked').value;
+	  const select = document.getElementById('categorySelect');
+	  select.innerHTML = '';
+
+	  categories[type].forEach
+	  (cat => 
+	  {
+		const option = document.createElement('option');
+		option.value = cat;
+		option.textContent = cat;
+		select.appendChild(option);
+	  }
+	  );
+	}
+
+	function toggleNewCategory() 
+	{
+		const input = document.getElementById('newCategory');
+		input.style.display = input.style.display === 'none' ? 'inline-block' : 'none';
+	}
+
+    function addEntry() {
+	  const type = document.querySelector('input[name="type"]:checked').value;
+	  const newCatInput = document.getElementById('newCategory');
+	  const category = newCatInput.style.display !== 'none' && newCatInput.value.trim()
+		? newCatInput.value.trim()
+		: document.getElementById('categorySelect').value;
+
+	  const amount = parseFloat(document.getElementById('amount').value);
+	  const month = document.getElementById('month').value.padStart(2, '0');
+	  const year = document.getElementById('year').value;
+	  const key = `${year}-${month}`;
+
+	  if (!category || isNaN(amount) || amount <= 0) 
+	  {
+		alert('Please enter a valid category and amount.');
+		return;
+	  }
+
+	  // Save new category if needed
+	  if (!categories[type].includes(category)) 
+	  {
+		categories[type].push(category);
+		localStorage.setItem('categories', JSON.stringify(categories));
+		updateCategoryDropdown();
+	  }
+
+	  if (!data[key]) data[key] = { income: {}, expense: {} };
+	  const bucket = data[key][type];
+	  bucket[category] = (bucket[category] || 0) + amount;
+
+	  localStorage.setItem('budgetData', JSON.stringify(data));
+	  alert(`${type} of $${amount.toFixed(2)} added to "${category}" for ${key}.`);
+
+	  document.getElementById('amount').value = '';
+	  newCatInput.value = '';
+	  newCatInput.style.display = 'none';
+	  displayCurrentMonthData();
+}
+
+
+	function populateMonthDropdown(selectId) 
+	{
+		const select = document.getElementById(selectId);
+		const currentMonth = new Date().getMonth(); // 0-indexed: Jan = 0
+		const monthNames = Array.from({ length: 12 }, (_, i) =>
+			new Date(0, i).toLocaleString('default', { month: 'long' })
+		);
+		
+		monthNames.forEach((name, i) => 
+		{
+			const option = document.createElement('option');
+			option.value = i + 1;
+			option.textContent = name;
+			if (i === currentMonth) option.selected = true;
+			select.appendChild(option);
+		});
+	}
+	
+	function generateReport() {
+  const month = document.getElementById('reportMonth').value.padStart(2, '0');
+  const year = document.getElementById('reportYear').value;
+  const key = `${year}-${month}`;
+  const entry = data[key];
+
+  if (!entry) {
+    document.getElementById('report').textContent = `No data found for ${key}.`;
+    return;
+  }
+
+  const income = entry.income;
+  const expenses = entry.expense;
+
+  const totalIncome = Object.values(income).reduce((sum, val) => sum + val, 0);
+  const totalExpenses = Object.values(expenses).reduce((sum, val) => sum + val, 0);
+  const balance = totalIncome - totalExpenses;
+
+  let report = `📅 Report for ${key}\n\n`;
+
+  report += `💵 Income Categories:\n`;
+  for (const [cat, amt] of Object.entries(income)) {
+    report += `- ${cat}: $${amt.toFixed(2)}\n`;
+  }
+  report += `Total Income: $${totalIncome.toFixed(2)}\n\n`;
+
+  report += `💸 Expense Categories:\n`;
+  for (const [cat, amt] of Object.entries(expenses)) {
+    report += `- ${cat}: $${amt.toFixed(2)}\n`;
+  }
+  report += `Total Expenses: $${totalExpenses.toFixed(2)}\n\n`;
+
+  report += `🧮 Net Balance: $${balance.toFixed(2)}\n\n`;
+
+  if (balance > 0) {
+    report += '✅ You are spending less than you earn. Great job!\nConsider investing or saving the surplus.';
+  } else if (balance < 0) {
+    report += '⚠️ Your expenses exceed your income.\nAdvice:\n';
+    report += '- Review discretionary spending (e.g., dining, subscriptions).\n';
+    report += '- Look for ways to increase income (e.g., side gigs).\n';
+    report += '- Set a monthly budget and track it closely.';
+  } else {
+    report += 'You are breaking even. Consider optimizing your budget for savings.';
+  }
+
+  document.getElementById('report').textContent = report;
+}
+
+
+	function clearData() 
+	{
+		if (confirm('Are you sure you want to clear all data?')) 
+		{
+			localStorage.removeItem('budgetData');
+			localStorage.removeItem('categories');
+	
+			// Reset in-memory objects
+			for (const key in data) delete data[key];
+			categories.income = [];
+			categories.expense = [];
+	
+			alert('All data has been cleared.');
+			document.getElementById('report').textContent = '';
+			document.getElementById('currentData').textContent = '';
+			updateCategoryDropdown();
+		}
+	}
+	function clearCurrentMonth() 
+	{
+	const month = document.getElementById('reportMonth').value.padStart(2, '0');
+	const year = document.getElementById('reportYear').value;
+	const key = `${year}-${month}`;
+
+	if (data[key]) {
+		if (confirm(`Are you sure you want to clear all data for ${key}?`)) {
+		delete data[key];
+		localStorage.setItem('budgetData', JSON.stringify(data));
+		alert(`Data for ${key} has been cleared.`);
+		document.getElementById('report').textContent = '';
+		displayCurrentMonthData();
+		}
+	} else {
+		alert(`No data found for ${key}.`);
+	}
+	}
+
+
+// Call this for both entry and report dropdowns
+populateMonthDropdown('month');
+populateMonthDropdown('reportMonth');
+
+document.getElementById('year').value = new Date().getFullYear();
+document.getElementById('reportYear').value = new Date().getFullYear();
+updateCategoryDropdown();
+displayCurrentMonthData();
+
+  </script>
+</body>
+</html>
