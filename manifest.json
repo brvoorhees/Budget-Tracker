@@ -1,7 +1,7 @@
 {
     "name": "Budget Assistant",
     "short_name": "BudgetApp",
-    "start_url": "micro-budget.html",
+    "start_url": "index.html",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#4CAF50",
@@ -19,4 +19,5 @@
       }
     ]
   }
+
   
