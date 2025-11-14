@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Budget Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    input, select, button { margin: 5px 0; padding: 8px; width: 100%; box-sizing: border-box; }
+    .section { margin-bottom: 20px; }
+    .category-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .category-row input { width: 60%; }
+    .category-row button { width: 35%; }
+    #display { white-space: pre-wrap; background: #f9f9f9; padding: 10px; border-radius: 5px; }
+#display {
+    white-space: pre-wrap;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  </style>
+</head>
+<body>
+
+
+
+
+  <h2>📊 Budget Assistant</h2>
+
+  <div class="section">
+    <button onclick="navigateTo('micro-budget.html')">Budget Assistant</button>
+    <button onclick="navigateTo('budget-tracker.html')">Budget Tracker</button>
+  </div>
+
+  <div class="section">
+    <label for="month">Month:</label>
+    <select id="month"></select>
+
+    <label for="year">Year:</label>
+    <input type="number" id="year" min="2000" max="2100" />
+  </div>
+
+  <div class="section">
+    <label for="budgetTotal">Budget Total:</label>
+    <input type="number" id="budgetTotal" min="1" />
+    <button onclick="saveBudget()">💾 Save Budget</button>
+  </div>
+
+  <div class="section">
+    <h3>➕ Add Category</h3>
+    <input type="text" id="categoryName" placeholder="Category name" />
+    <input type="number" id="categoryLimit" placeholder="Limit amount" />
+    <button onclick="addCategory()">Add Category</button>
+  </div>
+
+ <div class="section">
+  <h3>🗂️ Categories</h3>
+  <button onclick="toggleCategoryEditor()">✏️ Edit Categories</button>
+  <div id="categoryEditor" style="display: None; margin-top: 10px;"></div>
+</div>
+
+
+  <div class="section">
+    <h3>📋 Budget Overview</h3>
+    <div id="display"></div>
+  </div>
+
+  <div class="section">
+    <h3>🗑️ Delete Data</h3>
+    <button onclick="confirmDelete()">Delete Month’s Data</button>
+    <div id="deletePopup" style="display:none; margin-top:10px;">
+      <label><input type="checkbox" id="deleteAll"> Also delete all data</label><br>
+      <button onclick="deleteData()">OK</button>
+    </div>
+  </div>
+
+  <script src="script-assistant.js"></script>
+</body>
+</html>

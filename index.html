@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Budget Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    input, select, button { margin: 5px 0; padding: 8px; width: 100%; box-sizing: border-box; }
+    .section { margin-bottom: 20px; }
+    .highlight { color: red; font-weight: bold; }
+    #overview { white-space: pre-wrap; background: #f9f9f9; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+
+  <h2>📈 Budget Tracker</h2>
+
+  <div class="section">
+    <button onclick="navigateTo('micro-budget.html')">Budget Assistant</button>
+    <button onclick="navigateTo('budget-tracker.html')">Budget Tracker</button>
+  </div>
+
+  <div class="section">
+    <label for="month">Month:</label>
+    <select id="month"></select>
+
+    <label for="year">Year:</label>
+    <input type="number" id="year" min="2000" max="2100" />
+  </div>
+
+  <div class="section">
+    <label for="categorySelect">Category:</label>
+    <select id="categorySelect"></select>
+
+    <p id="categoryInfo"></p>
+    <button onclick="toggleExpenseEdit()">✏️ Edit Expenses</button>
+    <input type="text" id="expenseName" placeholder="Expense name or description" />
+    <input type="number" id="expenseAmount" placeholder="Enter expense amount" />
+
+    <button onclick="addExpense()">Add Expense</button>
+    
+
+  </div>
+
+  <div class="section">
+    <h3>📋 Category Overview</h3>
+    <div id="overview"></div>
+  </div>
+
+<button onclick="clearMonthExpensesOnly()">🧹 Clear All Expenses for This Month</button>
+
+  <script src="tracker-script.js"></script>
+</body>
+</html>
